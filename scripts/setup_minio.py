@@ -61,7 +61,8 @@ def main():
     client = create_s3_client()
     for bucket in BUCKETS:
         name = bucket["name"]
-        created = "\u2705 Criado" if created else  "\u26A0 Já existia"
+        created = create_bucket(client,name)
+        status = "\u2705 Criado" if created else  "\u26A0 Já existia"
         print(f"\n [{name.upper()} {status}]")
 
     print(f"Descrição: {bucket['description']}")
