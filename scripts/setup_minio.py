@@ -64,8 +64,8 @@ def main():
         created = create_bucket(client,name)
         status = "\u2705 Criado" if created else  "\u26A0 Já existia"
         print(f"\n [{name.upper()} {status}]")
-
-    print(f"Descrição: {bucket['description']}")
+        print(f"Descrição: {bucket['description']}")
+    
     print("\n" + "=" * 55)
     print("Buckets disponíveis no MinIO:")
     for b in list_buckets(client):
