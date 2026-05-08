@@ -40,3 +40,10 @@ bronze/
 Configuração do endpoint do airbyte:
 
 ![alt text](image.png)
+
+
+Configuração da fonte https:
+
+Utilizar a url: 
+
+https://restcountries.com/v3.1/all?fields=cca2,name,capital,maps,population,tld,translations,region,subregion,latlng
