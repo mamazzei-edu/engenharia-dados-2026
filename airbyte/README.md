@@ -1,7 +1,7 @@
 ## Instalação no Windows ##
 Instalar o abctl.exe a partir do seguinte endereço:
 
-[Airbyte](https://docs.airbyte.com/platformusing-airbyte/getting-started/oss-quickstart)
+[Airbyte](https://docs.airbyte.com/platform/using-airbyte/getting-started/oss-quickstart)
 
 Instalação como usuário não privilegiado:
 
