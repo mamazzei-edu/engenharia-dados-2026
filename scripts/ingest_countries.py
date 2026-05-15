@@ -37,6 +37,7 @@ os.environ["DESTINATION__FILESYSTEM__CREDENTIALS__REGION_NAME"] = "us-east-1"
 
 # URL da API
 API_URL = "https://restcountries.com/v3.1/all"
+
  
 # Campos selecionados para a ingestão (evitar sobrecarga com campos irrelevantes)
 CAMPOS_SELECIONADOS = [
