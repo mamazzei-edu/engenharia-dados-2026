@@ -864,7 +864,7 @@ s3_client.upload_file(
 )
 
 duracao = time.time() - inicio
-print(f"✅ Upload concluído em {duracao:.2f}s")
+print(f"✅ Upload concluido em {duracao:.2f}s")
 
 # Verificar o objeto no MinIO
 response = s3_client.head_object(Bucket="bronze", Key=chave_objeto)
@@ -2640,7 +2640,7 @@ df_pedidos.select(
 ```python
 # Célula 5 — Filtros e Seleções (equivalente ao WHERE e SELECT do SQL)
 
-# Filtrar apenas pedidos concluídos com valor total acima de R$ 500
+# Filtrar apenas pedidos concluidos com valor total acima de R$ 500
 df_pedidos_premium = (
     df_pedidos
     .filter(
@@ -2657,7 +2657,7 @@ df_pedidos_premium = (
     )
 )
 
-print("Pedidos concluídos com valor > R$ 500:")
+print("Pedidos concluidos com valor > R$ 500:")
 print(f"  Total filtrado: {df_pedidos_premium.count():,} registros")
 df_pedidos_premium.show(5)
 ```
@@ -2681,7 +2681,7 @@ df_receita_categoria = (
     .orderBy(F.desc("receita_total"))
 )
 
-print("Receita por Categoria e Região (pedidos concluídos):")
+print("Receita por Categoria e Região (pedidos concluidos):")
 df_receita_categoria.show(15)
 ```
 
