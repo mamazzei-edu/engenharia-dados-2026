@@ -3291,7 +3291,7 @@ import pyarrow.parquet as pq
 # Ler os dados do MinIO (camada Bronze)
 s3_client = boto3.client(
     "s3",
-    endpoint_url="http://localhost:9000",
+    endpoint_url="http://localhost:9000",  // ou http://host.docker.internal:9000
     aws_access_key_id="minioadmin",
     aws_secret_access_key="minioadmin123",
     region_name="us-east-1",
