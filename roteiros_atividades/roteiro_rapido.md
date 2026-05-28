@@ -1,4 +1,9 @@
-## Roteiro rápido para início das aulas
+# Roteiro rápido para início das aulas
+
+## Se você já tiver efetuado os passos das etapas anteriores e os containeres existirem:
+docker compose -f docker/compose.yaml up -d
+
+## Se você não tiver o conteúdo das aulas anteriores ou se precisar recriá-los:
 
 ```ps1
 git clone https://github.com/mamazzei-edu/engenharia-dados-2026.git
@@ -25,7 +30,7 @@ Se não houver os buckets bronze, silver e gold, será necessário criá-los:
 ```ps1
 python scripts/setup_minio.py
 python scripts/ingest_pokemon.py
-python scripts/ingest_coutries.py
+python scripts/ingest_countries.py
 python scripts/reingerir_com_particionamento.py
 ```
 
@@ -40,5 +45,11 @@ Encontrar o link no docker:
 
 Clicar no link e executar os seguintes notebooks:
 
+parte1_formatos_arquivo_docker.ipynb
 
+parte2a_pyspark.ipynb
+
+parte2b_duckdb.ipynb
+
+parte2c_iceberg.ipynb
 
