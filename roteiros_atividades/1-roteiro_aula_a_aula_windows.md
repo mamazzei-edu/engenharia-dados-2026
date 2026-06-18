@@ -2347,7 +2347,7 @@ python scripts/verificar_manifesto.py
 
 ### Passo 5 — Leitura com Partition Pruning
 
-Demonstre como o particionamento por data permite leituras eficientes, ignorando partições desnecessárias:
+Demonstração de como o particionamento por data permite leituras eficientes, ignorando partições desnecessárias:
 
 ```python
 # scripts/demonstrar_partition_pruning.py
@@ -2378,7 +2378,7 @@ def ler_particao_especifica(
 ) -> pd.DataFrame:
     """
     Lê apenas a partição correspondente à data especificada.
-    Ignora todas as outras partições — isso é partition pruning.
+    Ignora todas as outras partições — isso é o partition pruning.
     """
     prefixo = f"{sistema}/{entidade}/ano={ano}/mes={mes:02d}/dia={dia:02d}/"
 
@@ -2433,7 +2433,7 @@ python scripts/demonstrar_partition_pruning.py
 
 ### Verificação Final da Atividade 3
 
-Ao concluir esta atividade, o aluno deve ser capaz de:
+Ao concluir esta atividade, você deve ser capaz de:
 
 1. Explicar a convenção de particionamento `ano=YYYY/mes=MM/dia=DD` e por que ela é o padrão da indústria
 2. Utilizar a classe `BronzeWriter` para gravar qualquer DataFrame na camada Bronze com metadados padronizados
@@ -3117,7 +3117,7 @@ print(info.to_string(index=False))
 
 ### Verificação Final da Atividade 2
 
-Ao concluir esta atividade, o aluno deve ser capaz de:
+Ao concluir esta atividade, você deve ser capaz de:
 
 1. Configurar o DuckDB com a extensão `httpfs` para acessar arquivos Parquet no MinIO
 2. Executar consultas SQL analíticas complexas (GROUP BY, CTEs, window functions) diretamente sobre Parquet no S3, sem importar os dados
@@ -3349,17 +3349,32 @@ print(f"   Registros inseridos: {len(df_amostra):,}")
 ### Passo 5 — Demonstração de Time Travel
 
 ```python
-# Célula 4 — Inspecionar o histórico de snapshots
+# Célula 4 - apenas relacionar os snapshots
 
-print("=== Histórico de Snapshots da Tabela Iceberg ===\n")
-
-for snapshot in tabela.history():
+for snapshot in table.snapshots():
     print(f"  Snapshot ID:    {snapshot.snapshot_id}")
     print(f"  Timestamp:      {datetime.fromtimestamp(snapshot.timestamp_ms / 1000, tz=timezone.utc)}")
-    print(f"  Operação:       {snapshot.summary.get('operation', 'N/A')}")
-    print(f"  Arquivos adicionados: {snapshot.summary.get('added-data-files', '0')}")
-    print(f"  Registros adicionados: {snapshot.summary.get('added-records', '0')}")
-    print()
+    
+    if snapshot.summary:
+        # No PyIceberg, 'operation' costuma ser um atributo direto, enquanto as métricas usam .get()
+        print(f"  Operação:       {snapshot.summary.operation}")
+        print(f"  Arquivos adicionados: {snapshot.summary.get('added-data-files', '0')}")
+        print(f"  Registros adicionados: {snapshot.summary.get('added-records', '0')}")
+
+## ou percorrer os snapshots por ordem cronológica
+
+for snapshot in table.snapshots():
+    print(f"  Snapshot ID:    {snapshot.snapshot_id}")
+    print(f"  Timestamp:      {datetime.fromtimestamp(snapshot.timestamp_ms / 1000, tz=timezone.utc)}")
+    
+    if snapshot.summary:
+        # No PyIceberg, 'operation' costuma ser um atributo direto, enquanto as métricas usam .get()
+        print(f"  Operação:       {snapshot.summary.operation}")
+        print(f"  Arquivos adicionados: {snapshot.summary.get('added-data-files', '0')}")
+        print(f"  Registros adicionados: {snapshot.summary.get('added-records', '0')}")
+        print()
+
+
 ```
 
 ```python
@@ -3400,7 +3415,7 @@ for snap in historico:
 # Célula 6 — Time Travel: consultar o estado da tabela em um snapshot anterior
 
 # Obter o ID do primeiro snapshot
-snapshot_inicial = historico[-1]  # O mais antigo é o último na lista
+snapshot_inicial = historico[-2]  # O mais antigo é o último na lista
 snapshot_id_v1 = snapshot_inicial.snapshot_id
 
 print(f"=== Time Travel — Consultando Snapshot {snapshot_id_v1} ===\n")
@@ -3554,7 +3569,7 @@ print(f"""
 
 ### Verificação Final da Atividade 3
 
-Ao concluir esta atividade, o aluno deve ser capaz de:
+Ao concluir esta atividade, você deve ser capaz de:
 
 1. Explicar a diferença entre um Data Lake (Parquet puro) e um Data Lakehouse (Iceberg/Delta Lake) em termos de funcionalidades e casos de uso
 2. Configurar um catálogo Iceberg local com PyIceberg e criar tabelas com schema fortemente tipado e particionamento declarativo
@@ -3576,7 +3591,189 @@ As três atividades desta aula completaram o ciclo de processamento sobre a cama
 | Pipeline de produção com atualizações frequentes | Iceberg + Spark ou Iceberg + DuckDB |
 | Prototipagem rápida, ambiente local | DuckDB + PyIceberg |
 
-Na **Aula 4**, os dados processados serão formalizados em transformações documentadas e testadas utilizando o **dbt (Data Build Tool)**, construindo a camada Silver com modelos `staging` e `intermediate` que seguem as melhores práticas de engenharia de software aplicadas a dados.
+Na **Próxima aula 4 - staging e intermediate**, os dados processados serão formalizados em transformações documentadas e testadas utilizando o **dbt (Data Build Tool)**, construindo a camada Silver com modelos `staging` e `intermediate` que seguem as melhores práticas de engenharia de software aplicadas a dados.
+
+## Resumo: ##
+
+| Funcionalidade | Data Lake (Parquet Puro) | Data Lakehouse ( Iceberg / Delta ) |
+| --- | --- | ---| 
+|Transações ACID|Não possui. Se um job de escrita falhar no meio, os dados ficam corrompidos ou duplicados.|Sim. Garante que operações de escrita/deleção ou terminem com sucesso ou sejam totalmente revertidas.|
+| Leitura/Escrita Simultânea| Problemático. Se alguém tentar ler uma pasta enquanto um processo está escrevendo nela, a query vai falhar ou ler dados parciais.|Isolamento Total. Leitores sempre veem uma versão consistente da tabela, mesmo enquanto novos dados estão sendo gravados.|
+| Time Travel (Viagem no Tempo)|Manual e complexo. Exige que você gerencie cópias de arquivos ou partições com carimbos de data/hora na unha.|Nativo. Permite consultar a tabela exatamente como ela estava em um timestamp ou ID de snapshot específico no passado.|
+|Evolução de Schema| Rígida. Renomear ou deletar colunas frequentemente quebra tabelas e exige reprocessar o histórico inteiro para não gerar erros de leitura. |Flexível e segura. Você pode adicionar, remover ou renomear colunas instantaneamente sem reescrever um único arquivo de dados.|
+|Particionamento| Oculto, Manual. O usuário precisa saber como os arquivos estão divididos em pastas (ex: ano=2026/mes=06/) para escrever queries eficientes.|Automático. O motor (Iceberg) cuida do particionamento. Se você filtrar por data, ele sabe quais arquivos abrir sem que você precise explicitar a estrutura de pastas.|
+
+## Casos de Uso: Quando escolher cada um? ##
+- Quando o Data Lake (Parquet Puro) ainda faz sentido?
+    - O modelo tradicional brilha pela simplicidade absoluta e pelo baixo custo, sendo ideal para cenários onde os dados são majoritariamente estáticos:
+
+    - Arquivamento de Logs e Auditoria (Cold Storage): Dados que são gravados uma única vez (WORM - Write Once, Read Many) e raramente consultados.
+
+     - Pipelines de Batch Simples: Processos em lote que rodam de madrugada, apagam a pasta de destino por completo (overwrite) e escrevem os dados de novo, sem concorrência de usuários.
+
+    - Landing Zones / Staging Areas: A primeira camada de ingestão de um pipeline, onde os dados brutos chegam do sistema de origem e precisam apenas ser salvos rapidamente para processamento posterior.
+
+- Quando você PRECISA migrar para um Data Lakehouse?
+    - O Lakehouse foi feito para resolver a dor de manter dados analíticos em constante transformação e expostos para a empresa inteira:
+
+    - Ingestão em Tempo Real ou Streaming: Se você precisa plugar um fluxo do Kafka ou Spark Streaming atualizando o Lake a cada minuto, o Lakehouse evita o problema de "milhões de microarquivos" gerenciando compactações automáticas em segundo plano.
+
+    - Conformidade com LGPD / GDPR (Deleções e Updates): Apagar os dados de um cliente específico em um Data Lake puro exige ler pastas inteiras, filtrar o usuário e reescrever os arquivos. No Lakehouse, você simplesmente roda um comando DELETE WHERE user_id = X e a camada de metadados resolve isso de forma performática.
+
+    - BI diretamente no Lake: Permitir que analistas de negócios usem ferramentas como Tableau, PowerBI ou motores de consulta rápidos (Trino, Athena) para consultar o Lake diretamente, sem medo de pegar dados inconsistentes ou quebrar a query porque um pipeline de engenharia está rodando no mesmo instante.
 
 ---
+
+## Aula 4 - Staging e intermediate - dbt ##
+
+O Iceberg nos oferece as garantias de confiabilidade. Mas ainda temos um
+problema: 
+
+o código de processamento que escrevemos nas Aulas 2 e 3 — os scripts Python, os notebooks Spark, as consultas DuckDB ad hoc — não são reprodutíveis, não são testados automaticamente e não estão documentados de forma que outra pessoa
+possa entender facilmente.
+
+- Se eu perguntar: ʻComo foi calculado o segmento VIP de um cliente?’, alguém conseguiria responder sem ler o código inteiro? 
+- Se eu modificar a lógica de cálculo, como sei que não quebrei nada?
+
+## É exatamente esse problema que a Aula 4 resolve. Hoje vamos aprender o dbt - Data Build Tool ##
+
+O dbt é uma ferramenta que aplica as melhores práticas de engenharia de software ao código de transformação de dados.
+
+Vamos entender o paradigma que ele representa:
+
+## ELT — Extract, Load, Transform ##
+
+Nós já falamos de ETL — Extract, Transform, Load. No ETL clássico, os dados são extraídos da fonte, transformados em um servidor intermediário — geralmente um servidor de ETL dedicado — e só então carregados no destino final. Ferramentas como Informatica, SSIS e Talend são exemplos desse paradigma.
+
+O ELT inverte a ordem das duas últimas etapas. Os dados são extraídos, carregados imediatamente no repositório de destino — no nosso caso, o Data Lake — e somente então transformados. A transformação acontece dentro do próprio repositório, usando o poder computacional do banco de dados ou do motor analítico.
+
+Nos anos 2000, armazenamento era caro e poder computacional nos bancos de dados era limitado. Fazia sentido transformar os dados antes de armazenar para economizar espaço. Hoje, armazenamento em nuvem custa centavos por gigabyte, e bancos de dados como BigQuery e Snowflake — e o nosso DuckDB — conseguem processar terabytes de dados com SQL puro. 
+
+O ELT aproveita esse poder computacional disponível no próprio repositório. O dbt gerencia exclusivamente o T do ELT — a etapa de transformação. Ele não extrai dados, não os carrega no repositório. Ele pega os dados que já estão lá — na nossa camada Bronze — e os transforma em modelos limpos, documentados e testados na camada Silver e Gold.
+
+E faz isso de uma forma muito elegante: cada modelo dbt é um arquivo .sql que contém uma única instrução SELECT. O dbt compila esse SELECT em um CREATE TABLE AS ou CREATE CREATE VIEW AS e o executa no banco de dados de destino. Isso significa que você escreve SQL puro — sem aprender uma nova linguagem — e ganha automaticamente controle de versão, testes, documentação e linhagem de dados.
+
+```sql
+models/staging/stg_pedidos.sql
+    ↓  (dbt compile)
+
+CREATE VIEW staging.stg_pedidos AS
+SELECT
+cast(id_pedido as bigint) as pedido_id,
+lower(trim(categoria))    
+as categoria,
+...
+FROM read_parquet('s3://bronze/...')
+    ↓  (dbt run)
+[Executado no DuckDB]
+```
+
+
+O arquivo .sql que o engenheiro de dados escreve contém apenas o
+SELECT. O dbt cuida de envolver esse SELECT no  CREATE VIEW AS correto, com o schema e o nome de tabela adequados. Isso é o que permite ao dbt gerenciar as dependências entre modelos automaticamente — ele sabe que int_pedidos_enriquecidos depende de stg_pedidos porque o modelo contém {{ ref('stg_pedidos') }}.
+Essa referência {{ ref() }} é a chave de tudo no dbt. Ela faz três coisas: 
+- Primeiro, resolve o nome correto da view ou tabela no banco de dados de destino. 
+- Segundo, registra a dependência para que o dbt execute os modelos na ordem correta. 
+- Terceiro, permite ao dbt gerar o grafo de linhagem automaticamente — sem nenhuma configuração manual.
+
+
+## Estrutura de um projeto dbt - melhores práticas ##
+
+A estrutura de um projeto dbt bem organizado segue uma hierarquia de três camadas de modelos: staging, intermediate e marts. Cada camada tem responsabilidades bem definidas e regras que não devem ser violadas.
+
+## Staging ##
+A camada de staging é a interface entre os dados brutos da Bronze e o restante do projeto. Cada modelo staging tem uma correspondência 1:1 com uma tabela ou arquivo de origem — um modelo staging por fonte. 
+
+Ele faz exclusivamente transformações atômicas: renomeia colunas para o padrão do projeto, converte tipos de dados, padroniza strings. Nenhuma lógica de negócio, nenhum join, nenhuma agregação. É materializado como  view — não consome espaço de armazenamento.
+
+## Intermediate ##
+A camada intermediate é onde a complexidade vive. Os modelos intermediate combinam múltiplos modelos staging, fazem joins, deduplicação, cálculos de métricas derivadas. Eles produzem as visões de negócio que alimentarão os modelos finais. Também são materializados como view — seu valor está na organização lógica do código, não no armazenamento.
+
+
+## Marts ##
+A camada marts — que construiremos na Aula 5 — é o produto final. São as tabelas que os analistas de dados, as ferramentas de BI e os modelos de Machine Learning vão consumir. São materializadas como table — persistidas no banco de dados para performance de leitura.
+
+
+## Por que os modelos staging são materializados como view em vez de table? ##
+
+Uma view é apenas uma consulta salva — quando você consulta a view, o banco de dados executa o SQL subjacente em tempo real. Não há dados duplicados, não há custo de armazenamento, e qualquer mudança na fonte é refletida automaticamente na próxima consulta.
+
+Agora, um conceito fundamental que diferencia projetos dbt profissionais de amadores: a documentação e os testes são parte do código, não documentação separada.
+
+No dbt, cada modelo tem um arquivo YAML correspondente que declara a descrição do modelo, a descrição de cada coluna, e os testes de qualidade que devem ser executados. Quando você roda 
+dbt test, o dbt gera e executa automaticamente as queries de teste — verificando que colunas not_null não têm valores nulos, que colunas unique não têm duplicatas, que colunas accepted_values contêm apenas os valores esperados.
+
+Isso é radicalmente diferente de escrever testes em um documento Word ou em um
+arquivo de texto separado que ninguém atualiza. Os testes vivem junto com o
+código, são executados automaticamente em cada dbt run, e falham o pipeline se
+os dados não atenderem às expectativas.
+
+## Data quality as code ##
+“Vejam este exemplo. O arquivo _staging.yml documenta o modelo stg_pedidos, descreve cada coluna, e declara os testes: 
+
+- not_null para pedido_id e cliente_id, 
+- accepted_values para status_pedido. 
+
+Quando você roda dbt test --select staging, o dbt gera e executa as queries de teste automaticamente. Se algum teste falhar, o dbt reporta qual coluna, qual modelo e quantos registros falharam.
+
+Isso é Data Quality as Code — qualidade de dados tratada como código,
+versionada no Git, executada em CI/CD, revisada em pull requests.
+
+## Princípio DRY ##
+
+“O princípio DRY — Don’t Repeat Yourself é um dos pilares da engenharia de
+software. Ele diz que cada pedaço de conhecimento deve ter uma representação
+única e não ambígua no sistema. Em código de dados, violamos esse princípio
+constantemente: escrevemos lower(trim(categoria)) em dez modelos diferentes, ou replicamos o mesmo CASE WHEN de mapeamento de status em cinco consultas.
+
+O problema não é só estético. Se o mapeamento de status mudar — por exemplo,
+um novo status 'devolvido' for adicionado, você precisa encontrar e atualizar
+todos os lugares onde esse CASE WHEN aparece. Se esquecer um, os dados ficam inconsistentes.
+
+As macros Jinja do dbt resolvem isso. Uma macro é uma função escrita em Jinja —
+a linguagem de template que o dbt usa — que pode ser chamada em qualquer
+modelo do projeto. Você define a lógica uma vez, e ela é reutilizada em todos os
+modelos que precisam dela.
+
+Macro padroniza_string:
+
+```
+-- Sem macro (repetido em 10 modelos):
+lower(trim(categoria)) as categoria,
+lower(trim(regiao))    as regiao,
+lower(trim(status))    as status
+
+-- Com macro (definida uma vez, usada em qualquer lugar):
+{{ padronizar_string('categoria') }}  as categoria,
+{{ padronizar_string('regiao') }}     as regiao,
+{{ padronizar_string('status') }}     as status
+```
+
+## Macros JINJA ##
+A macro padronizar_string é definida uma vez em macros/padronizar_string.sql e pode ser chamada em qualquer modelo com
+{{ padronizar_string('nome_da_coluna') }}. 
+
+O dbt expande a macro para o SQL equivalente durante a compilação — o banco de dados nunca vê o código Jinja, apenas o SQL puro resultante.
+Na Atividade 4, vamos criar quatro macros: uma para padronização de strings, uma para mapeamento de status, uma para geração de colunas de auditoria, e uma macro avançada que usa loops Jinja para gerar SQL dinâmico — algo impossível com SQL puro.
+
+## Preparação para a sequência ##
+
+```sh
+dbt --version
+python -c "import duckdb; print(duckdb.__version__)"
+pip install dbt-core dbt-duckdb
+dbt --version
+```
+
+O dbt-core é o núcleo do dbt e o dbt-duckdb é adaptador que permite ao dbt se comunicar com o DuckDB. Em produção, vocês usariam dbt-biquery, dbt-snowflake ou dbt-postgres dependendo do banco de dados de destino. A beleza do dbt é que o mesmo projeto funciona com qualquer adaptador —você muda apenas o profiles.yml. 
+
+
+## Inicializar um projeto dbt ##
+
+```sh
+dbt init dbt_project
+# Selecionar "duckdb" quando solicitado
+cd dbt_project
+find . -type f | sort
+```
 
