@@ -1,4 +1,14 @@
-## Roteiro rápido para início das aulas
+# Roteiro rápido para início das aulas
+
+## Se você já tiver efetuado os passos das etapas anteriores e os containeres existirem:
+docker compose -f docker/compose.yaml up -d
+
+## Se você não tiver o conteúdo das aulas anteriores ou se precisar recriá-los:
+
+Quando estiver na Mauá ou em outro ambiente controlado:
+
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+
 
 ```ps1
 git clone https://github.com/mamazzei-edu/engenharia-dados-2026.git
@@ -50,5 +60,11 @@ parte2c_iceberg.ipynb
 
 
 
+parte1_formatos_arquivo_docker.ipynb
 
+parte2a_pyspark.ipynb
+
+parte2b_duckdb.ipynb
+
+parte2c_iceberg.ipynb
 
