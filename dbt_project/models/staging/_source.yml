@@ -1,11 +1,15 @@
 version: 2
 
 sources:
+  - name: bronze_processado
+    meta:
+      external-location> "s3:/silver/bronze_processado/{name}"
+    tables:
+      - name: pedidos_ecommerce
   - name: bronze_ecommerce
     description: >
       Dados brutos do sistema de e-commerce ingeridos na camada Bronze.
       Arquivos Parquet particionados por data de ingestão no MinIO.
-    database: "{{ env_var('DBT_DATABASE', 'main') }}"
     schema: bronze_raw
     meta:
       owner: "Equipe de Engenharia de Dados"
