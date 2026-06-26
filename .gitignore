@@ -9,4 +9,4 @@ data/
 .env
 *.log
 
-dbt_projeto/.dbt/profiles.yml
+dbt_project/.dbt/profiles.yml

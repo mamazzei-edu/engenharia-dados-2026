@@ -17,7 +17,7 @@ ecommerce_lakehouse:
 
     prod:
       type: duckdb
-      path: /Users/marco.mazzei/engenharia-dados-2026/data/data/dbt_prod.duckdb
+      path: /Users/marco.mazzei/engenharia-dados-2026/data/dbt_prod.duckdb
       threads: 8
       extensions:
         - httpfs

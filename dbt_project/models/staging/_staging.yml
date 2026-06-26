@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: stg_pedidos
+    description: >
+      Pedidos do e-commerce com colunas padronizadas e tipos convertidos.
+      Fonte: camada Bronze (ecommerce_sintetico).
+    columns:
+      - name: pedido_id
+        description: "Identificador único do pedido"
+        tests:
+          - not_null
+      - name: cliente_id
+        description: "Identificador do cliente"
+        tests:
+          - not_null
+      - name: status_pedido
+        description: "Status do pedido em lowercase"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['concluido', 'cancelado', 'pendente', 'reembolsado']
+      - name: valor_total
+        description: "Valor total do pedido em Reais"
+        tests:
+          - not_null
+      - name: avaliacao_cliente
+        description: "Nota de 1 a 5 dada pelo cliente (pode ser nula)"
+        tests:
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]
+              config:
+                where: "avaliacao_cliente is not null"

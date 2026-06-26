@@ -14,7 +14,7 @@ snapshot-paths: ["snapshots"]
 target-path: "target"
 clean-targets:
   - "target"
-  - "dbt_packages
+  - "dbt_packages"
 
 # ── Configurações de Materialização por Camada ────────────────────────────────
 # Cada camada tem uma estratégia de materialização diferente:
