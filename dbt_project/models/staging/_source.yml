@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: bronze_processado
     meta:
-      external-location> "s3:/silver/bronze_processado/{name}"
+      external-location: "s3:/silver/bronze_processado/{name}"
     tables:
       - name: pedidos_ecommerce
   - name: bronze_ecommerce
