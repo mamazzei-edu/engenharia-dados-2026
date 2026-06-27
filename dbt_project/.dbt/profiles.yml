@@ -3,12 +3,21 @@ ecommerce_lakehouse:
   outputs:
     dev:
       type: duckdb
-      path: /Users/marco.mazzei/engenharia-dados-2026/data/dbt_dev.duckdb
+      # Caminho para o banco de dados DuckDB de desenvolvimento.
+      # IMPORTANTE: Ajuste este caminho para o diretório raiz do repositório
+      # na SUA máquina. Exemplo:
+      #   Linux/Mac: /home/seu_usuario/engenharia-dados-2026/data/dbt_dev.duckdb
+      #   Windows:   C:/Users/seu_usuario/engenharia-dados-2026/data/dbt_dev.duckdb
+      #
+      # Alternativamente, defina a variável de ambiente DBT_DEV_DB_PATH:
+      #   export DBT_DEV_DB_PATH=/caminho/para/engenharia-dados-2026/data/dbt_dev.duckdb
+      path: "{{ env_var('DBT_DEV_DB_PATH', '~/engenharia-dados-2026/data/dbt_dev.duckdb') }}"
       threads: 4
       extensions:
         - httpfs
       settings:
-        # Configurações do MinIO como fonte S3
+        # Configurações do MinIO como fonte S3-compatível
+        # Certifique-se de que o MinIO está rodando: docker-compose up -d minio
         s3_endpoint: 'localhost:9000'
         s3_access_key_id: 'minioadmin'
         s3_secret_access_key: 'minioadmin123'
@@ -17,7 +26,9 @@ ecommerce_lakehouse:
 
     prod:
       type: duckdb
-      path: /Users/marco.mazzei/engenharia-dados-2026/data/dbt_prod.duckdb
+      # Caminho para o banco de dados DuckDB de produção.
+      # Defina a variável de ambiente DBT_PROD_DB_PATH ou ajuste o caminho abaixo.
+      path: "{{ env_var('DBT_PROD_DB_PATH', '~/engenharia-dados-2026/data/dbt_prod.duckdb' ) }}"
       threads: 8
       extensions:
         - httpfs

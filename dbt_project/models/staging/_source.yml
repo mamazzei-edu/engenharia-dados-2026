@@ -3,9 +3,10 @@ version: 2
 sources:
   - name: bronze_processado
     meta:
-      external-location: "s3:/silver/bronze_processado/{name}"
+      external-location: "s3://silver/bronze_processado/{name}"
     tables:
       - name: pedidos_ecommerce
+
   - name: bronze_ecommerce
     description: >
       Dados brutos do sistema de e-commerce ingeridos na camada Bronze.
@@ -20,7 +21,7 @@ sources:
         description: >
           Tabela de pedidos brutos com 1.000.000 registros sintéticos.
           Contém inconsistências intencionais para demonstração de limpeza.
-        identifier: "read_parquet('s3://bronze/ecommerce_sintetico/**/*.parquet')"
+        identifier: "read_parquet('s3://bronze/ecommerce_sintetico/**/*.parquet' )"
         columns:
           - name: id_pedido
             description: "Identificador único do pedido (chave primária)"
